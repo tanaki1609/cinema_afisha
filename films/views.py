@@ -4,7 +4,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Film
-from .serializers import FilmListSerializer, FilmDetailSerializer
+from .serializers import FilmListSerializer, FilmDetailSerializer, FilmValidateSerializer
 from django.db import transaction
 
 
@@ -23,14 +23,20 @@ def film_list_create_api_view(request):
             status=status.HTTP_200_OK,  # int (100, 200, 300, 400, 500)
         )
     elif request.method == 'POST':
+        # step 0: Validation (Existing, Typing, Extra)
+        serializer = FilmValidateSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(status=status.HTTP_400_BAD_REQUEST,
+                            data=serializer.errors)
+
         # step 1: Receive data from RequestBody
-        title = request.data.get('title')
-        text = request.data.get('text')
-        release_year = request.data.get('release_year')
-        rating = request.data.get('rating')
-        is_hit = request.data.get('is_hit')
-        director_id = request.data.get('director_id')
-        genres = request.data.get('genres')
+        title = serializer.validated_data.get('title')
+        text = serializer.validated_data.get('text')
+        release_year = serializer.validated_data.get('release_year')
+        rating = serializer.validated_data.get('rating')
+        is_hit = serializer.validated_data.get('is_hit')  # "Y"
+        director_id = serializer.validated_data.get('director_id')
+        genres = serializer.validated_data.get('genres')
 
         # step 2: Create film by received data
         with transaction.atomic():
