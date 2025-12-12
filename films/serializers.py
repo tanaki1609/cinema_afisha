@@ -3,6 +3,12 @@ from .models import Film, Director, Review, Genre
 from rest_framework.exceptions import ValidationError
 
 
+class GenreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Genre
+        fields = '__all__'
+
+
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
@@ -12,7 +18,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 class DirectorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Director
-        fields = 'id fio'.split()
+        fields = 'id fio birthday'.split()
 
 
 class FilmListSerializer(serializers.ModelSerializer):
@@ -48,6 +54,7 @@ class FilmValidateSerializer(serializers.Serializer):
     is_hit = serializers.BooleanField(default=True)
     director_id = serializers.IntegerField()
     genres = serializers.ListField(child=serializers.IntegerField(min_value=1))
+
     # reviews = serializers.ListField(child=ReviewValidateSerializer())
 
     def validate_director_id(self, director_id):

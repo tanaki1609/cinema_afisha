@@ -1,11 +1,45 @@
-from pprint import pprint
-
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Film
-from .serializers import FilmListSerializer, FilmDetailSerializer, FilmValidateSerializer
+from .models import Film, Director, Genre
+from .serializers import (FilmListSerializer,
+                          FilmDetailSerializer,
+                          FilmValidateSerializer,
+                          DirectorSerializer,
+                          GenreSerializer)
 from django.db import transaction
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.viewsets import ModelViewSet
+
+
+class CustomPagination(PageNumberPagination):
+    def get_paginated_response(self, data):
+        return Response({
+            'total': self.page.paginator.count,
+            'next': self.get_next_link(),
+            'previous': self.get_previous_link(),
+            'results': data,
+        })
+
+
+class DirectorListCreateAPIView(ListCreateAPIView):
+    queryset = Director.objects.all()  # List of data from DB
+    serializer_class = DirectorSerializer  # class inherited by ModelSerializer
+    pagination_class = CustomPagination
+
+
+class DirectorDetailAPIView(RetrieveUpdateDestroyAPIView):
+    queryset = Director.objects.all()
+    serializer_class = DirectorSerializer
+    lookup_field = 'id'
+
+
+class GenreViewSet(ModelViewSet):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    pagination_class = CustomPagination
+    lookup_field = 'id'
 
 
 @api_view(http_method_names=['GET', 'POST'])
