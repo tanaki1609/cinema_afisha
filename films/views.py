@@ -6,7 +6,8 @@ from .serializers import (FilmListSerializer,
                           FilmDetailSerializer,
                           FilmValidateSerializer,
                           DirectorSerializer,
-                          GenreSerializer)
+                          GenreSerializer,
+                          DirectorCreateSerializer)
 from django.db import transaction
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.pagination import PageNumberPagination
@@ -28,11 +29,21 @@ class DirectorListCreateAPIView(ListCreateAPIView):
     serializer_class = DirectorSerializer  # class inherited by ModelSerializer
     pagination_class = CustomPagination
 
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return DirectorCreateSerializer
+        return self.serializer_class
+
 
 class DirectorDetailAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Director.objects.all()
     serializer_class = DirectorSerializer
     lookup_field = 'id'
+
+    def get_serializer_class(self):
+        if self.request.method == 'PUT':
+            return DirectorCreateSerializer
+        return self.serializer_class
 
 
 class GenreViewSet(ModelViewSet):
